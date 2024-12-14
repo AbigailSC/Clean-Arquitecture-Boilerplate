@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { AuthRepository, RegisterUserDto } from "../../domain";
 import logger from "../../infraestructure/logger/logger.config";
-import { stringify } from "querystring";
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
@@ -13,6 +12,7 @@ export class AuthController {
       const user = await this.authRepository.register(registerUserDto!);
       res.json(user);
     } catch (error) {
+      logger.error("Register user error" + error);
       res.status(500).json(error);
     }
   };
