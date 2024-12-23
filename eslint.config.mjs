@@ -1,20 +1,29 @@
-{
-  "$schema": "https://json.schemastore.org/eslintrc.json",
-  "env": {
-    "es2021": true,
-    "node": true
+import js from '@eslint/js'
+
+const config = {
+  env: {
+    es2021: true,
+    node: true,
   },
-  "extends": [
+  extends: [
+    "@commitlint/config-conventional",
     "plugin:prettier/recommended",
-    "eslint:recommended"
+    "eslint:recommended",
   ],
-  "plugins": [
+  plugins: [
     "unused-imports",
     "import",
     "@typescript-eslint",
-    "prettier"
+    "prettier",
   ],
-  "rules": {
+  ignorePatterns: [
+    "dist",
+    "public/*",
+    "scripts/*",
+    "node_modules",
+    "build",
+  ],
+  rules: {
     "no-console": "warn",
     "prettier/prettier": "warn",
     "no-unused-vars": "off",
@@ -22,21 +31,21 @@
     "unused-imports/no-unused-imports": "warn",
     "object-curly-spacing": [
       "error",
-      "never"
+      "never",
     ],
     "no-unexpected-multiline": "warn",
     "@typescript-eslint/no-misused-promises": [
       "error",
       {
-        "checksVoidReturn": false
-      }
+        checksVoidReturn: false,
+      },
     ],
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/no-invalid-void-type": "off",
     "import/order": [
       "warn",
       {
-        "groups": [
+        groups: [
           "type",
           "builtin",
           "object",
@@ -44,17 +53,19 @@
           "internal",
           "parent",
           "sibling",
-          "index"
+          "index",
         ],
-        "pathGroups": [
+        pathGroups: [
           {
-            "pattern": "~/**",
-            "group": "external",
-            "position": "after"
-          }
+            pattern: "~/**",
+            group: "external",
+            position: "after",
+          },
         ],
-        "newlines-between": "always"
-      }
-    ]
-  }
-}
+        newlinesBetween: "always",
+      },
+    ],
+  },
+};
+
+export default config;
