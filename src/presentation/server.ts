@@ -1,5 +1,5 @@
-import express, { Router } from "express";
-import logger, { morganMiddleware } from "../infraestructure/logger/logger.config";
+import express, { Router } from 'express';
+import logger, { morganMiddleware } from '../config/logger.config';
 
 interface Options {
   port?: number;

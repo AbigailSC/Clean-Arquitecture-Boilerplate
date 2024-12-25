@@ -1,11 +1,11 @@
-import path from "path";
-import { createLogger, format, transports, addColors } from "winston";
-import DailyRotateFile from "winston-daily-rotate-file";
-import morgan, { StreamOptions } from "morgan";
+import path from 'path';
+import { createLogger, format, transports, addColors } from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import morgan, { StreamOptions } from 'morgan';
 
 const getCallerInfo = () => {
   const err = new Error();
-  const stack = err.stack?.split("\n")[3] || ""; // Toma el tercer nivel del stack trace
+  const stack = err.stack?.split('\n')[3] || ''; // Toma el tercer nivel del stack trace
   const match = stack.match(/\((.*):(\d+):(\d+)\)/); // Extrae archivo, línea y columna
   if (match) {
     const [_, filePath, line, col] = match;
@@ -23,10 +23,10 @@ const stream: StreamOptions = {
 };
 
 export const morganMiddleware = morgan(
-  ":method :url :status :res[content-length] - :response-time ms",
+  ':method :url :status :res[content-length] - :response-time ms',
   {
     stream,
-  }
+  },
 );
 
 const customLevels = {
@@ -40,13 +40,13 @@ const customLevels = {
     silly: 6, //* For logging the most detailed information, often more than needed.
   },
   colors: {
-    error: "red",
-    warn: "yellow",
-    info: "blue",
-    http: "green",
-    verbose: "magenta",
-    debug: "cyan",
-    silly: "white",
+    error: 'red',
+    warn: 'yellow',
+    info: 'blue',
+    http: 'green',
+    verbose: 'magenta',
+    debug: 'cyan',
+    silly: 'white',
   },
 };
 
@@ -59,51 +59,51 @@ const consoleFormat = format.combine(
   })(),
   format.colorize(),
   format.timestamp({
-    format: "YYYY-MM-DD HH:mm:ss",
+    format: 'YYYY-MM-DD HH:mm:ss',
   }),
   format((info) => {
     info.caller = getCallerInfo();
     return info;
   })(),
   format.printf(({ timestamp, level, message, service, ...rest }) => {
-    const meta = Object.keys(rest).length > 0 ? JSON.stringify(rest, null, 2) : "";
-    return `${timestamp} [${level}]: ${message} ${service ? `[Service: ${service}]` : ""} ${meta}`;
-  })
+    const meta = Object.keys(rest).length > 0 ? JSON.stringify(rest, null, 2) : '';
+    return `${timestamp} [${level}]: ${message} ${service ? `[Service: ${service}]` : ''} ${meta}`;
+  }),
 );
 
 const fileFormat = format.combine(
   format.timestamp({
-    format: "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    format: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
   }),
-  format.metadata({ fillExcept: ["timestamp", "level", "message"] }),
+  format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
   format.json({
     space: 2,
-  })
+  }),
 );
 
 const logger = createLogger({
   levels: customLevels.levels,
-  level: "debug",
-  defaultMeta: { service: "Clean Arquitecture Boilerplate", sell: getCallerInfo() },
+  level: 'debug',
+  defaultMeta: { service: 'Clean Arquitecture Boilerplate', set: getCallerInfo() },
   transports: [
     new transports.Console({ format: consoleFormat }),
     new DailyRotateFile({
-      filename: "logs-%DATE%.log",
-      dirname: "./logs",
-      datePattern: "YYYY-MM-DD",
+      filename: 'logs-%DATE%.log',
+      dirname: './logs',
+      datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "14d",
+      maxSize: '20m',
+      maxFiles: '14d',
       format: fileFormat,
     }),
     new DailyRotateFile({
-      filename: "errors-%DATE%.log",
-      dirname: "./logs",
-      datePattern: "YYYY-MM-DD",
+      filename: 'errors-%DATE%.log',
+      dirname: './logs',
+      datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
-      maxSize: "20m",
-      maxFiles: "14d",
-      level: "error",
+      maxSize: '20m',
+      maxFiles: '14d',
+      level: 'error',
       format: fileFormat,
     }),
   ],

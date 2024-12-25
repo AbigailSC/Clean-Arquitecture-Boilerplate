@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { AuthRepository, RegisterUserDto } from "../../domain";
-import logger from "../../infraestructure/logger/logger.config";
+import { Request, Response } from 'express';
+import { AuthRepository, RegisterUserDto } from '../../domain';
+import logger from '../../config/logger.config';
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
@@ -12,12 +12,12 @@ export class AuthController {
       const user = await this.authRepository.register(registerUserDto!);
       res.json(user);
     } catch (error) {
-      logger.error("Register user error" + error);
+      logger.error('Register user error' + error);
       res.status(500).json(error);
     }
   };
 
   loginUser = async (_req: Request, res: Response) => {
-    res.json("Login user controller");
+    res.json('Login user controller');
   };
 }
