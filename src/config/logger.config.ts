@@ -84,7 +84,7 @@ const fileFormat = format.combine(
 const logger = createLogger({
   levels: customLevels.levels,
   level: 'debug',
-  defaultMeta: { service: 'Clean Arquitecture Boilerplate', extend: getCallerInfo() },
+  /*defaultMeta: { service: 'Clean Arquitecture Boilerplate' , extend: getCallerInfo() },*/
   transports: [
     new transports.Console({ format: consoleFormat }),
     new DailyRotateFile({

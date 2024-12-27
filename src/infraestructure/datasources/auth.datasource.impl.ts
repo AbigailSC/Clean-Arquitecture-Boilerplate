@@ -17,7 +17,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
     try {
       const exists = await UserModel.findOne({ email: email });
       if (exists) {
-        throw CustomError.badRequest('Email already exists.');
+        throw CustomError.badRequest('Error with credentials');
       }
 
       const user = await UserModel.create({
@@ -28,7 +28,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
 
       await user.save();
 
-      return UserMapper.fromObject(user);
+      return UserMapper.fromUserObject(user);
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;

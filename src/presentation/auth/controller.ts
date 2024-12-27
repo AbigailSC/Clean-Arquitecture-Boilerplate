@@ -1,9 +1,13 @@
 import { Request, Response } from 'express';
 import { AuthRepository, RegisterUserDto } from '../../domain';
 import logger from '../../config/logger.config';
+import { ErrorHandler } from '../../domain/errors';
 
 export class AuthController {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly authRepository: AuthRepository,
+    private readonly errorHandler: ErrorHandler,
+  ) {}
 
   registerUser = async (req: Request, res: Response) => {
     try {
@@ -13,7 +17,7 @@ export class AuthController {
       res.json(user);
     } catch (error) {
       logger.error('Register user error' + error);
-      res.status(500).json(error);
+      this.errorHandler.handleError(error, res);
     }
   };
 

@@ -1,8 +1,8 @@
-import { CustomError, UserEntity } from '../../domain';
+import { UserEntity } from '../../domain';
 import { Name, Email, Id, Password, Roles } from '../../shared';
 
 export class UserMapper {
-  static fromObject(object: { [key: string]: any }) {
+  static fromUserObject(object: { [key: string]: any }) {
     const { id, _id, name, email, password, roles } = object;
 
     const validatedId = new Id(id);
