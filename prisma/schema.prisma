@@ -1,0 +1,329 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model User {
+  id                  String                @id @default(uuid())
+  email               String                @unique
+  password            String            
+  verified            Boolean               @default(false)
+  is_active           Boolean               @default(true)
+  code                String?
+  image_url           String?
+  document            Int
+  phone               Int       //TODO Json con num area y numero repo git
+  first_name          String
+  middle_name         String?
+  last_name           String    // * Tal vez json con {first, second, third}
+  gender              String
+  birthdate           DateTime
+  identities          Identity[]
+  customer            Customer?
+  seller              Seller?
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Address{
+  id                  Int                   @id @default(autoincrement())
+  street              String                @db.VarChar(120)
+  postal_code         String                @db.VarChar(12)
+  city                City                  @relation(fields: [city_id], references: [id])
+  city_id             Int           
+  customer            Customer              @relation(fields: [customer_id], references: [id])
+  customer_id         String                 
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Customer{
+  id                  String                @id @default(uuid())
+  user                User                  @relation(fields: [user_id], references: [id])
+  user_id             String                @unique
+  address             Address[]           
+  favorites           Favorite[]            
+  order               Order[]           
+  history             History[]
+  cart                Cart?
+  address_id          Int           
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Seller{
+  id                  String                @id @default(uuid())
+  name                String                @db.VarChar(60)
+  slug                String                @unique @db.VarChar(20)
+  image_url           String?           
+  user                User                  @relation(fields: [user_id], references: [id])
+  user_id             String                @unique
+  product             Product[]           
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Identity{
+  id                  Int                   @id @default(autoincrement())
+  user                User                  @relation(fields: [user_id], references: [id])
+  user_id             String            
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Tag{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  slug                String                @unique @db.VarChar(20)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Color{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  code                String?
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+} // TODO Se me ocurre que el color puede ser el codigo hex o el rgb tal: #FFFFFF o rgb(255, 255, 255)
+
+model Brand{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  slug                String                @unique @db.VarChar(20)
+  image_url           String?           
+  description         String?               @db.VarChar(120)
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int                   @unique
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Size{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Status{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  description         String?               @db.VarChar(120)
+  order               Order[]           
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model City{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  country             Country               @relation(fields: [country_id], references: [id])
+  country_id          Int
+  address             Address[]
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Country{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  city                City[]            
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Category{
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  slug                String                @unique @db.VarChar(20)
+  image_url           String?           
+  description         String?               @db.VarChar(120)
+  products            CategoriesOnProducts[]
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Product{
+  id                  Int                   @id @default(autoincrement())
+  seller              Seller                @relation(fields: [seller_id], references: [id])
+  seller_id           String            
+  name                String                @db.VarChar(90)
+  sku                 String                @unique @db.VarChar(20)
+  description         String?               @db.Text //TODO WYIWYG Html Tiptap library
+  slug                String                @unique @db.VarChar(20)
+  color               Color[]           
+  size                Size[]            
+  price               Float                 @db.DoublePrecision
+  discount            Coupon?           
+  stock               Int           
+  is_active           Boolean               @default(true)
+  is_available        Boolean               @default(true)
+  categories          CategoriesOnProducts[]
+  orders              ProductsOnOrders[]
+  method_payment      PaymentMethod[]
+  shipping_method     ShippingMethod[]
+  brand               Brand?
+  carts               ProductsOnCart[]
+  order_id            String
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Order{
+  id                  String                @id @default(uuid())
+  customer            Customer              @relation(fields: [customer_id], references: [id])
+  customer_id         String     
+  products            ProductsOnOrders[]
+  method_payment      PaymentMethod         @relation(fields: [payment_method_id], references: [id])
+  payment_method_id   Int     
+  shipping_method     ShippingMethod        @relation(fields: [shipping_method_id], references: [id])
+  shipping_method_id  Int     
+  status              Status                @relation(fields: [status_id], references: [id])
+  history             History               @relation(fields: [history_id], references: [id])
+  history_id          Int
+  notes               String?               @db.Text
+  phone               Int       
+  address             String?               @db.VarChar(254)
+  total_amount        Float?                @db.DoublePrecision
+  status_id           Int                 
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model ProductsOnOrders {
+  order               Order                 @relation(fields: [order_id], references: [id])
+  order_id            String            
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int           
+  quantity            Int           
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+  @@id([order_id, product_id])
+}
+
+model CategoriesOnProducts {
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int           
+  category            Category              @relation(fields: [category_id], references: [id])
+  category_id         Int             
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+  @@id([product_id, category_id])
+}
+
+model Coupon{
+  id                  Int                   @id @default(autoincrement())
+  code                String                @unique @db.VarChar(32)
+  name                String                @db.VarChar(60)
+  description         String?               @db.VarChar(120)
+  uses                Int                   @default(0)
+  max_uses            Int                   @default(100)
+  max_uses_user       Int                   @default(1)
+  type                String                @default("percentage") // percentage, fixed, voucher
+  discount_amount     Float                 @default(0)
+  is_fixed            Boolean               @default(true)
+  start_date          DateTime            
+  expires_date        DateTime            
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int                   @unique
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model ShippingMethod {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  price               Float?                @db.DoublePrecision
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int
+  orders              Order[]
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model PaymentMethod {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(60)
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int
+  orders              Order[]
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Favorite{
+  id                  Int                   @id @default(autoincrement())
+  customer            Customer              @relation(fields: [customer_id], references: [id])
+  customer_id         String     
+  product_id          Int
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model History{
+  id                  Int                   @id @default(autoincrement())
+  customer            Customer              @relation(fields: [customer_id], references: [id])
+  customer_id         String     
+  order               Order[]
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model Cart{
+  id                  Int                   @id @default(autoincrement())
+  customer            Customer              @relation(fields: [customer_id], references: [id])
+  customer_id         String                @unique   
+  products            ProductsOnCart[]
+  quantity            Int
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+}
+
+model ProductsOnCart{
+  cart                Cart                  @relation(fields: [cart_id], references: [id])
+  cart_id             Int
+  product             Product               @relation(fields: [product_id], references: [id])
+  product_id          Int
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+  @@id([cart_id, product_id])
+}
