@@ -1,18 +1,18 @@
-import mongoose, { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
   name: {
     type: String,
-    required: [true, "Name is required"],
+    required: [true, 'Name is required'],
   },
   email: {
     type: String,
     unique: true,
-    required: [true, "Email is required"],
+    required: [true, 'Email is required'],
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: [true, 'Password is required'],
   },
   img: {
     type: String,
@@ -23,9 +23,9 @@ const userSchema = new Schema({
         type: String,
       },
     ],
-    default: ["user"],
-    enum: ["admin", "user"],
+    default: ['user'],
+    enum: ['admin', 'user'],
   },
 });
 
-export const UserModel = model("User", userSchema);
+export const UserModel = model('User', userSchema);

@@ -1,19 +1,11 @@
 import { JwtAdapter } from '../../../config';
 import { RegisterUserDto } from '../../dtos/auth/register-user.dto';
 import { CustomError } from '../../errors';
+import { UserToken } from '../../interfaces';
 import { AuthRepository } from '../../repositories/auth.repository';
 
 interface RegisterUserUseCase {
   execute(registerUserDto: RegisterUserDto): Promise<UserToken>;
-}
-
-interface UserToken {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
 }
 
 type SignToken = (payload: Object, duration?: string) => Promise<string | null>;
