@@ -14,7 +14,7 @@ export class AuthRoutes {
     const authRepository = new AuthRepositoryImpl(datasource);
     const controller = new AuthController(authRepository, errorHandler);
 
-    router.post('/register', controller.registerUser);
+    router.post('/register', controller.registerUser as RequestHandler);
     router.post('/login', controller.loginUser);
     router.get('/users', [AuthMiddleware.validateJwt as RequestHandler], controller.getUsers);
 

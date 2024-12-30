@@ -62,7 +62,7 @@ const consoleFormat = format.combine(
     format: 'YYYY-MM-DD HH:mm:ss',
   }),
   format((info) => {
-    info.caller = getCallerInfo();
+    //info.caller = getCallerInfo();
     return info;
   })(),
   format.printf(({ timestamp, level, message, service, ...rest }) => {
