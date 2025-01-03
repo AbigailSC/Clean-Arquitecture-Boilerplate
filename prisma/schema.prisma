@@ -13,6 +13,22 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model LogModel {
+  id                  Int                   @id @default(autoincrement())
+  message             String                @db.Text
+  origin              String                @db.VarChar(60)
+  level               SeverityLevel
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+}
+
 model User {
   id                  String                @id @default(uuid())
   email               String                @unique
@@ -31,6 +47,7 @@ model User {
   identities          Identity[]
   customer            Customer?
   seller              Seller?
+  notifications        Notification[]
   created_at          DateTime              @default(now())
   updated_at          DateTime              @updatedAt
   deleted_at          DateTime?
@@ -192,7 +209,7 @@ model Product{
   shipping_method     ShippingMethod[]
   brand               Brand?
   carts               ProductsOnCart[]
-  order_id            String
+  images              String[]              @db.Text
   created_at          DateTime              @default(now())
   updated_at          DateTime              @updatedAt
   deleted_at          DateTime?
@@ -326,4 +343,15 @@ model ProductsOnCart{
   updated_at          DateTime              @updatedAt
   deleted_at          DateTime?
   @@id([cart_id, product_id])
+}
+
+model Notification{
+  id                  Int                   @id @default(autoincrement())
+  user                User                  @relation(fields: [user_id], references: [id])
+  user_id             String            
+  message             String                @db.Text
+  read                Boolean               @default(false)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
 }

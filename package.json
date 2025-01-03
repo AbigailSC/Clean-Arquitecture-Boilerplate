@@ -44,6 +44,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@prisma/client": "^6.1.0",
     "@types/morgan": "^1.9.9",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
