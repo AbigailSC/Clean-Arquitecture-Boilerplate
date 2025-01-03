@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import logger from '../../config/logger.config';
+
 import {
   AuthRepository,
   LoginUser,
@@ -8,14 +8,18 @@ import {
   RegisterUserDto,
 } from '../../domain';
 import { ErrorHandler } from '../../domain/errors';
-import { JwtAdapter } from '../../config';
+import { JwtAdapter, LoggerMethods } from '../../config';
 import { UserModel } from '../../data/mongodb';
 
 export class AuthController {
+  private readonly logger: LoggerMethods;
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly errorHandler: ErrorHandler,
-  ) {}
+    buildLogger: (service?: string) => LoggerMethods,
+  ) {
+    this.logger = buildLogger('controller.ts');
+  }
 
   registerUser = async (req: Request, res: Response) => {
     const [error, registerUserDto] = RegisterUserDto.create(req.body);
@@ -28,7 +32,7 @@ export class AuthController {
       );
       res.status(201).json({ message: 'User registered successfully', data: data });
     } catch (error) {
-      logger.error('Register user error' + error);
+      this.logger.error('Register user error' + error);
       this.errorHandler.handleError(error, res);
     }
   };
@@ -44,7 +48,7 @@ export class AuthController {
       );
       res.status(200).json({ message: 'Login successful', data: data });
     } catch (error) {
-      logger.error('Login user error' + error);
+      this.logger.error('Login user error' + error);
       this.errorHandler.handleError(error, res);
     }
   };
@@ -54,7 +58,7 @@ export class AuthController {
       const users = await UserModel.find();
       res.json({ users });
     } catch (error) {
-      logger.error('Get users error: ' + error);
+      this.logger.error('Get users error: ' + error);
     }
   };
 }

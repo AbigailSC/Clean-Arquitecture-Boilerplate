@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
-import logger from '../../config/logger.config';
 import { PrismaClient } from '@prisma/client';
+import { buildLogger } from '../../config';
 
 interface Options {
   mongoUrl: string;
   dbName: string;
 }
+const logger = buildLogger();
 
 export class MongoDatabase {
   static async connect(options: Options) {
@@ -23,14 +24,17 @@ export class MongoDatabase {
         level: 'HIGH',
       },
     });
-    console.log('🚀 ~ MongoDatabase ~ connect ~ logs:', logs);
+    // console.log('🚀 ~ MongoDatabase ~ connect ~ logs:', logs);
 
     const { dbName, mongoUrl } = options;
     try {
       await mongoose.connect(mongoUrl, {
         dbName: dbName,
       });
-      logger.info('Mongo connected');
+      logger.info('Mongo connected', {
+        database: dbName,
+        mongoVersion: mongoose.version,
+      });
       return true;
     } catch (error) {
       logger.error('Mongo connection error');

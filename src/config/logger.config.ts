@@ -3,21 +3,6 @@ import { createLogger, format, transports, addColors } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import morgan, { StreamOptions } from 'morgan';
 
-const getCallerInfo = () => {
-  const err = new Error();
-  const stack = err.stack?.split('\n')[3] || ''; // Toma el tercer nivel del stack trace
-  const match = stack.match(/\((.*):(\d+):(\d+)\)/); // Extrae archivo, línea y columna
-  if (match) {
-    const [_, filePath, line, col] = match;
-    return {
-      file: path.basename(filePath),
-      line: parseInt(line, 10),
-      column: parseInt(col, 10),
-    };
-  }
-  return {};
-};
-
 const stream: StreamOptions = {
   write: (message) => logger.http(message),
 };
@@ -54,20 +39,16 @@ addColors(customLevels.colors);
 
 const consoleFormat = format.combine(
   format((info) => {
+    info.splat = info[Symbol.for('splat')];
     info.level = info.level.toUpperCase();
     return info;
   })(),
-  format.colorize(),
   format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss',
   }),
-  format((info) => {
-    //info.caller = getCallerInfo();
-    return info;
-  })(),
-  format.printf(({ timestamp, level, message, service, ...rest }) => {
-    const meta = Object.keys(rest).length > 0 ? JSON.stringify(rest, null, 2) : '';
-    return `${timestamp} [${level}]: ${message} ${service ? `[Service: ${service}]` : ''} ${meta}`;
+  format.colorize({ all: true }),
+  format.printf(({ timestamp, level, message, splat }) => {
+    return `[${timestamp}] [${level}] ${message}`;
   }),
 );
 
@@ -75,7 +56,6 @@ const fileFormat = format.combine(
   format.timestamp({
     format: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
   }),
-  format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
   format.json({
     space: 2,
   }),
@@ -84,7 +64,6 @@ const fileFormat = format.combine(
 const logger = createLogger({
   levels: customLevels.levels,
   level: 'debug',
-  /*defaultMeta: { service: 'Clean Arquitecture Boilerplate' , extend: getCallerInfo() },*/
   transports: [
     new transports.Console({ format: consoleFormat }),
     new DailyRotateFile({
@@ -108,5 +87,38 @@ const logger = createLogger({
     }),
   ],
 });
+export interface LoggerMethods {
+  info: (message: string, metadata?: Record<string, unknown>) => void;
+  error: (message: string, metadata?: Record<string, unknown>) => void;
+  warn: (message: string, metadata?: Record<string, unknown>) => void;
+  debug: (message: string, metadata?: Record<string, unknown>) => void;
+}
 
-export default logger;
+const getCallerFile = () => {
+  const err = new Error();
+  Error.prepareStackTrace = (_, stack) => stack;
+  const stack = err.stack as unknown as NodeJS.CallSite[];
+  Error.prepareStackTrace = undefined;
+
+  const caller = stack.find((call) => {
+    const fileName = call.getFileName();
+    return fileName && !fileName.includes('logger.config');
+  });
+
+  if (!caller) return 'unknown';
+
+  const fileName = caller.getFileName();
+  return fileName ? path.basename(fileName) : 'unknown';
+};
+
+export const buildLogger = (): LoggerMethods => {
+  const getService = () => getCallerFile();
+  return {
+    info: (message: string) => logger.info(message, getService()),
+    error: (message: string) => logger.error(message, getService()),
+    warn: (message: string, metadata = {}) =>
+      logger.warn(message, { ...metadata, service: getService() }),
+    debug: (message: string, metadata = {}) =>
+      logger.debug(message, { ...metadata, service: getService() }),
+  };
+};

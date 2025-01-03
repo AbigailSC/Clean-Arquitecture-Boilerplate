@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import logger, { morganMiddleware } from '../config/logger.config';
+import { morganMiddleware, LoggerMethods } from '../config/logger.config';
 
 interface Options {
   port?: number;
@@ -10,10 +10,11 @@ export class Server {
   public readonly app = express();
   private readonly port: number;
   private readonly routes: Router;
+  private readonly logger: LoggerMethods;
 
-  constructor(options: Options) {
+  constructor(options: Options, buildLogger: (service?: string) => LoggerMethods) {
     const { port = 3000, routes } = options;
-
+    this.logger = buildLogger('server.ts');
     this.port = port;
     this.routes = routes;
   }
@@ -25,7 +26,7 @@ export class Server {
     this.app.use(this.routes);
 
     this.app.listen(this.port, () => {
-      logger.info(`Server running on port ${this.port}`);
+      this.logger.info(`Server running on port ${this.port}`);
     });
   }
 }

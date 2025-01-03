@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { PrismaClient } from '@prisma/client';
-import logger from '../../config/logger.config';
 
 interface Options {
   mongoUrl: string;
@@ -17,17 +16,15 @@ export class PostgreDatabase {
         origin: 'App.ts',
       },
     });
-    console.log('🚀 ~ PostgreDatabase ~ connect ~ newLog:', newLog);
+    // console.log('🚀 ~ PostgreDatabase ~ connect ~ newLog:', newLog);
 
     const { dbName, mongoUrl } = options;
     try {
       await mongoose.connect(mongoUrl, {
         dbName: dbName,
       });
-      logger.info('Mongo connected');
       return true;
     } catch (error) {
-      logger.error('Mongo connection error');
       throw error;
     }
   }
