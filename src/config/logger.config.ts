@@ -116,9 +116,7 @@ export const buildLogger = (): LoggerMethods => {
   return {
     info: (message: string) => logger.info(message, getService()),
     error: (message: string) => logger.error(message, getService()),
-    warn: (message: string, metadata = {}) =>
-      logger.warn(message, { ...metadata, service: getService() }),
-    debug: (message: string, metadata = {}) =>
-      logger.debug(message, { ...metadata, service: getService() }),
+    warn: (message: string) => logger.warn(message, getService()),
+    debug: (message: string) => logger.debug(message, getService()),
   };
 };
